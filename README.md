@@ -1,1 +1,1 @@
-# hadoop
+# Configuring Hadoop using Ansible
