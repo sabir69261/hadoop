@@ -1,0 +1,61 @@
+- hosts: namenode
+  vars_prompt:
+          - name: directoryname
+            prompt: Please Enter the Directory name for name node
+  tasks:
+          - name: Downloading Jdk software
+            get_url:
+              url: http://35.244.242.82/yum/java/el7/x86_64/jdk-8u171-linux-x64.rpm
+              dest: /root
+            register: Jdk_Download_status
+
+          - name: Downloading hadoop software
+            get_url:
+              url: https://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1-1.x86_64.rpm
+              dest: /root
+            register: hadoop_download_status
+
+          - name: Installing Jdk software
+            command: rpm -i jdk-8u171-linux-x64.rpm
+            when: Jdk_download_status.failed == false
+            register: jdk_status
+
+          - name: Installing Hadoop software
+            command: rpm -i hadoop-1.2.1-1.x86_64.rpm --force
+            when: hadoop_download_status.fialed == false
+            register: hadoop_status
+            ignore_errors: true
+         
+          - name: Deleting the core site and hdfs site file
+            command: rm -rf /etc/hadoop/core-site.xml  /etc/hadoop/hdfs-site.xml
+            register: hadoop_conf_file_remove_status
+
+          - name: Copying core file using template
+            template:
+              src: /root/namenode/core-site.xml
+              dest: /etc/hadoop
+
+          - name: Creating Directory for namenode
+            file:
+              path: /{{ directoryname }}
+              state: directory
+            register: directory_status
+
+          - name: Copying hdfs file using template
+            template:
+              src: /root/namenode/hdfs-site.xml
+              dest: /etc/hadoop
+            when: directory_status.failed == false
+
+          - name: Formatting hadoop namenode
+            shell: echo "Y" | hadoop namenode -format
+
+          - name: starting the namenode service
+            command: hadoop-daemon.sh start namenode
+
+          - name: Making namenode service permanent
+            shell: echo "hadoop-daemon.sh start namenode" >> /root/.bashrc
+          
+          - name: Playbook status
+            debug:
+               msg: "Master node configure successfully" 
