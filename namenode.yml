@@ -2,6 +2,7 @@
   vars_prompt:
           - name: directoryname
             prompt: Please Enter the Directory name for name node
+            private: no
   tasks:
           - name: Downloading Jdk software
             get_url:
