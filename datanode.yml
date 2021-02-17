@@ -28,9 +28,8 @@
             command: rpm -i hadoop-1.2.1-1.x86_64.rpm --force
             when: hadoop_download_status.failed == false
             register: hadoop_status
-            when: jdk_status.rc == 0
          
-                    - name: Deleting the core site and hdfs site file
+          - name: Deleting the core site and hdfs site file
             command: rm -rf /etc/hadoop/core-site.xml  /etc/hadoop/hdfs-site.xml
             register: hadoop_conf_file_remove_status
 
